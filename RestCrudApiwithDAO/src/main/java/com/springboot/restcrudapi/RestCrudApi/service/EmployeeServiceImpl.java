@@ -1,39 +1,38 @@
 package com.springboot.restcrudapi.RestCrudApi.service;
 
-import com.springboot.restcrudapi.RestCrudApi.dao.EmployeeRepository;
+import com.springboot.restcrudapi.RestCrudApi.dao.EmployeeDAO;
 import com.springboot.restcrudapi.RestCrudApi.entity.Employee;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
-    private EmployeeRepository employeeRepository;
+    private EmployeeDAO employeeDAO;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository) {
-        this.employeeRepository = employeeRepository;
+    public EmployeeServiceImpl(EmployeeDAO employeeDAO) {
+        this.employeeDAO = employeeDAO;
     }
 
     @Override
     public List<Employee> listAll() {
-        return employeeRepository.findAll();
+        return employeeDAO.listAll();
     }
 
     @Override
     public Employee findById(int id) {
-        Optional<Employee>result=employeeRepository.findById(id);
-        return result.get();
+        return employeeDAO.findById(id);
     }
-
+    @Transactional
     @Override
     public Employee save(Employee employee) {
-        return employeeRepository.save(employee);
+        return employeeDAO.save(employee);
     }
-
+    @Transactional
     @Override
     public void deleteById(int id) {
-        employeeRepository.deleteById(id);
+        employeeDAO.deleteById(id);
     }
 }
