@@ -15,7 +15,11 @@ public class SecurityConfigurations {
     @Bean
      public UserDetailsManager userDetailsManager(DataSource dataSource)
     {
-        return new JdbcUserDetailsManager(dataSource);
+        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
+        jdbcUserDetailsManager.setUsersByUsernameQuery("select user_id, pw, active from members where user_id=?");
+        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery("select user_id, role from roles where user_id=?");
+
+        return jdbcUserDetailsManager;
     }
 
     @Bean
@@ -23,9 +27,18 @@ public class SecurityConfigurations {
     {
         httpSecurity.authorizeHttpRequests(configurer ->
                 configurer
+                        .requestMatchers("/").hasRole("EMPLOYEE")
+                        .requestMatchers("/leaders/**").hasRole("MANAGER")
+                        .requestMatchers("/managers/**").hasRole("MANAGER")
+                        .requestMatchers("/systems/**").hasRole("ADMIN")
                         .anyRequest()
                         .authenticated()
                 )
+                .exceptionHandling(configurer->
+                        configurer
+                                .accessDeniedPage("/access-denied"))
+
+
                 .formLogin(form->
                         form
                                 .loginPage("/showLoginPage")
@@ -36,21 +49,4 @@ public class SecurityConfigurations {
                 );
         return httpSecurity.build();
     }
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-//        http.authorizeHttpRequests(configurer ->
-//                configurer
-//                        .requestMatchers(HttpMethod.GET, "/demo/members").hasRole("EMPLOYEE")
-//                        .requestMatchers(HttpMethod.GET, "/demo/members/**").hasRole("EMPLOYEE")
-//                        .requestMatchers(HttpMethod.POST, "/demo/members").hasRole("MANAGER")
-//                        .requestMatchers(HttpMethod.PUT, "/demo/members").hasRole("MANAGER")
-//                        .requestMatchers(HttpMethod.DELETE, "/demo/members/**").hasRole("ADMIN")
-//        );
-//        http.csrf(csrf->
-//        csrf
-//        .disable()
-//        );
-//        http.httpBasic(Customizer.withDefaults());
-//        return http.build();
-//    }
 }
